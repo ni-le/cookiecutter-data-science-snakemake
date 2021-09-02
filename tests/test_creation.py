@@ -32,15 +32,6 @@ class TestCookieSetup(object):
         else:
             assert project.name == 'project_name'
 
-    def test_author(self):
-        setup_ = self.path / 'setup.py'
-        args = ['python', str(setup_), '--author']
-        p = check_output(args).decode('ascii').strip()
-        if pytest.param.get('author_name'):
-            assert p == 'DrivenData'
-        else:
-            assert p == 'Your name (or your organization/company/team)'
-
     def test_readme(self):
         readme_path = self.path / 'README.md'
         assert readme_path.exists()
@@ -49,42 +40,24 @@ class TestCookieSetup(object):
             with open(readme_path) as fin:
                 assert 'DrivenData' == next(fin).strip()
 
-    def test_setup(self):
-        setup_ = self.path / 'setup.py'
-        args = ['python', str(setup_), '--version']
-        p = check_output(args).decode('ascii').strip()
-        assert p == '0.1.0'
-
     def test_license(self):
         license_path = self.path / 'LICENSE'
         assert license_path.exists()
         assert no_curlies(license_path)
 
-    def test_license_type(self):
-        setup_ = self.path / 'setup.py'
-        args = ['python', str(setup_), '--license']
-        p = check_output(args).decode('ascii').strip()
-        if pytest.param.get('open_source_license'):
-            assert p == 'BSD-3'
-        else:
-            assert p == 'MIT'
-
-    def test_requirements(self):
-        reqs_path = self.path / 'requirements.txt'
+    def test_environment(self):
+        reqs_path = self.path / 'environment.yml'
         assert reqs_path.exists()
         assert no_curlies(reqs_path)
-        if pytest.param.get('python_interpreter'):
-            with open(reqs_path) as fin:
-                lines = list(map(lambda x: x.strip(), fin.readlines()))
-            assert 'pathlib2' in lines
 
-    def test_makefile(self):
-        makefile_path = self.path / 'Makefile'
-        assert makefile_path.exists()
-        assert no_curlies(makefile_path)
+    def test_snakefile(self):
+        snakefile_path = self.path / 'workflow/Snakefile'
+        assert snakefile_path.exists()
+        assert no_curlies(snakefile_path)
 
     def test_folders(self):
         expected_dirs = [
+            'config',
             'data',
             'data/external',
             'data/interim',
@@ -101,6 +74,9 @@ class TestCookieSetup(object):
             'src/features',
             'src/models',
             'src/visualization',
+            'workflow',
+            'workflow/envs',
+            'workflow/rules'
         ]
 
         ignored_dirs = [
@@ -110,4 +86,3 @@ class TestCookieSetup(object):
         abs_expected_dirs = [str(self.path / d) for d in expected_dirs]
         abs_dirs, _, _ = list(zip(*os.walk(self.path)))
         assert len(set(abs_expected_dirs + ignored_dirs) - set(abs_dirs)) == 0
-
